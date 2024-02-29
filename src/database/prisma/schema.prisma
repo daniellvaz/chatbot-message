@@ -7,10 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Role {
+  id    String @id @default(cuid())
+  name  String
+  value String
+
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  users User[]
+
+  @@map("roles")
+}
+
 model User {
   id    String @id @default(cuid())
   name  String
   email String @unique
+  role  Role @relation(fields: [roleId], references: [id])
+  roleId String 
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime  @updatedAt @map("updated_at")
@@ -19,26 +34,12 @@ model User {
   @@map("users")
 }
 
-model Attendant {
-  id       String    @id @default(cuid())
-  name     String
-  email    String    @unique
-  messages Message[]
-
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  @@map("attendants")
-}
-
 model Message {
   id          String     @id @default(cuid())
   content     String
   userId      String     @map("user_id")
   user        User       @relation(fields: [userId], references: [id])
   attendantId String?    @map("attendant_id")
-  Attendant   Attendant? @relation(fields: [attendantId], references: [id])
-  from        String     @default("system")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
