@@ -1,4 +1,4 @@
 import * as z from "zod";
-import { messageCreateSchema } from "./createSchema";
+import { roomCreateSchema } from "./createSchema";
 
-export type MessageCreateDTO = z.infer<typeof messageCreateSchema>;
+export type RoomCreateDTO = z.infer<typeof roomCreateSchema>;

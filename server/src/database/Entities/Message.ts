@@ -1,11 +1,11 @@
 export class Message {
   public id?: string;
   public content: string;
-  public room: string;
+  public roomId: string;
 
   constructor(data: Message) {
     this.id = data.id;
-    this.room = data.room;
+    this.roomId = data.roomId;
     this.content = data.content;
   }
 }

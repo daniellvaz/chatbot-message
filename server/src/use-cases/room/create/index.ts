@@ -1,4 +1,4 @@
 import { prisma } from "../../../database";
-import MessageCreateUseCase from "./create.usecase";
+import RoomCreateUseCase from "./create.usecase";
 
-export const messageCreateUseCase = new MessageCreateUseCase(prisma);
+export const roomCreateUseCase = new RoomCreateUseCase(prisma);

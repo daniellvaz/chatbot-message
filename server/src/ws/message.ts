@@ -7,6 +7,8 @@ import { prisma } from "../database";
 import { messageCreateUseCase } from "../use-cases/message/create";
 import { messageFindUseCase } from "../use-cases/message/find";
 import { Message } from "../database/Entities/Message";
+import { roomCreateUseCase } from "../use-cases/room/create";
+import { roomMemberUseCase } from "../use-cases/room/members";
 
 export const wsServer = new Server(server, {
   cors: {
@@ -34,19 +36,21 @@ wsServer.on("connection", async (socket) => {
     return;
   }
 
-  const messages = await messageFindUseCase.execute(userId);
+  const room = await roomCreateUseCase.execute({ name: user.name });
 
-  socket.join(user.id);
-  socket.to(user.id).emit("success", JSON.stringify(messages));
+  socket.join(room.name);
 
   socket.on("message", async (event) => {
-    const data: Message = JSON.parse(event);
+    const { content } = JSON.parse(event);
 
-    const message = await messageCreateUseCase.execute({
-      content: data.content,
-      userId: user.id,
+    await messageCreateUseCase.execute({
+      content,
+      roomId: room.id!,
     });
 
-    socket.to(data.room).emit(JSON.stringify(message));
+    await roomMemberUseCase.execute({
+      roomId: room.id!,
+      userId: user.id,
+    });
   });
 });

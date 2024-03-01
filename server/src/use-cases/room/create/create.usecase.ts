@@ -1,17 +1,30 @@
 import { PrismaClient } from "@prisma/client";
-import { MessageCreateDTO } from "./create.dto";
-import { messageCreateSchema } from "./createSchema";
-import { Message } from "../../../database/Entities/Message";
 
-export default class MessageCreateUseCase {
+import { RoomCreateDTO } from "./create.dto";
+import { roomCreateSchema } from "./createSchema";
+import { Room } from "../../../database/Entities/Room";
+
+export default class RoomCreateUseCase {
   constructor(private prisma: PrismaClient) {}
 
-  async execute(data: MessageCreateDTO): Promise<Message> {
-    const message = messageCreateSchema.parse(data);
-    const newMessage = new Message(message);
+  async execute(data: RoomCreateDTO): Promise<Room> {
+    const room = roomCreateSchema.parse(data);
+    const newRoom = new Room(room);
 
-    const result = await this.prisma.message.create({
-      data: newMessage,
+    const roomAlreadyExists = await this.prisma.room.findFirst({
+      where: {
+        name: newRoom.name,
+      },
+    });
+
+    if (roomAlreadyExists) {
+      return roomAlreadyExists;
+    }
+
+    const result = await this.prisma.room.create({
+      data: {
+        name: newRoom.name,
+      },
     });
 
     return result;
