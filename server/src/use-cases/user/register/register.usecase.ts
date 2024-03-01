@@ -4,6 +4,7 @@ import { User } from "../../../database/Entities/User";
 import { RegisterDTO } from "./register.dto";
 import { ZodType } from "zod";
 import Email from "../../../handler/Email";
+import { env } from "../../../env";
 
 export default class UserRegisterUseCase {
   constructor(
@@ -41,14 +42,14 @@ export default class UserRegisterUseCase {
     });
 
     await this.email.send({
-      from: "contato@moveuptech.com.br",
+      from: "daniellmurilo@yahoo.com.br",
       to: user.email,
       subject: "Verificação de e-mail",
       html: `
         <h1>Verifique seu e-mail</h1>
         <p>Olá ${result.name}! Por favor, clique no link abaixo para verificar seu e-mail</p>
 
-        <a href="http://localhost:3333/user/verify/${result.id}">
+        <a href="http://localhost:3333/api/user/verify/${result.id}?redirect_url=${env.REDIRECT_URL}">
           Clique aqui
         </a>
       `,

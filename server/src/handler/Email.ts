@@ -2,6 +2,7 @@ import { Attachment } from "nodemailer/lib/mailer";
 import nodemailer, { Transporter } from "nodemailer";
 
 import { env } from "../env";
+import { EmailResponse } from "../types/email";
 
 interface Send {
   from: string;
@@ -17,10 +18,10 @@ export default class Email {
 
   constructor() {
     this.transporter = nodemailer.createTransport({
-      host: env.EMAIL_USER,
-      port: Number(env.EMAIL_PORT),
+      host: env.EMAIL_HOST,
+      port: 465,
       secure: true,
-      debug: true,
+      debug: env.NODE_ENV === "development",
       auth: {
         user: env.EMAIL_USER,
         pass: env.EMAIL_PASSWORD,
@@ -28,7 +29,14 @@ export default class Email {
     });
   }
 
-  public async send({ from, to, subject, text, html, attachments }: Send) {
+  public async send({
+    from,
+    to,
+    subject,
+    text,
+    html,
+    attachments,
+  }: Send): Promise<EmailResponse> {
     const result = await this.transporter.sendMail({
       from,
       to,
@@ -38,6 +46,6 @@ export default class Email {
       attachments,
     });
 
-    console.log(result);
+    return result;
   }
 }
