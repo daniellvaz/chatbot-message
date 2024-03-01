@@ -25,23 +25,38 @@ model User {
   name   String
   email  String @unique
   role   Role   @relation(fields: [roleId], references: [id])
-  roleId String
+  roleId String @map("role_id")
+  rooms  RoomUsers[]
 
-  createdAt  DateTime  @default(now()) @map("created_at")
-  updatedAt  DateTime  @updatedAt @map("updated_at")
-  verifiedAt DateTime? @map("verified_at")
+  createdAt  DateTime    @default(now()) @map("created_at")
+  updatedAt  DateTime    @updatedAt @map("updated_at")
+  verifiedAt DateTime?   @map("verified_at")
 
   @@map("users")
 }
 
-model Room {
-  id   String @id
-  name String
-
-  messages Message[]
+model RoomUsers {
+  id String @id @default(cuid())
+  userId    String @map("user_id")
+  user User @relation(fields: [userId], references: [id])
+  roomId    String @map("room_id")
+  room Room @relation(fields: [roomId], references: [id])
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("room_users")
+}
+
+model Room {
+  id   String @id @default(cuid())
+  name String
+
+  messages Message[]
+  users RoomUsers[]
+
+  createdAt DateTime    @default(now()) @map("created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
 
   @@map("rooms")
 }
