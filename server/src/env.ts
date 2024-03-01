@@ -15,6 +15,7 @@ export const envSchema = z.object({
   EMAIL_PORT: z.string(),
   EMAIL_USER: z.string(),
   EMAIL_PASSWORD: z.string(),
+  REDIRECT_URL: z.string(),
 });
 
 export const env = envSchema.parse(process.env);
