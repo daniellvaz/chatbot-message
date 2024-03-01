@@ -1,0 +1,13 @@
+### User requests
+POST http://localhost:3333/api/user
+Content-Type: application/json
+
+{
+  "name": "Daniel",
+  "email": "daniellmvaz@gmail.com"
+}
+
+### Message requests
+GET http://localhost:3333/api/messages
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiJ9.Y2x0N3dsYXloMDAwMTVvODhrMnZjdDlsNw.1CZ1WwZeiVGBqQ0C4c_hG52ksGICCz3CkNVD2NyOO0o
