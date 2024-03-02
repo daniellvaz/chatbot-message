@@ -5,4 +5,7 @@ export const messageCreateSchema = z.object({
   roomId: z
     .string({ required_error: "Usuário não autorizado" })
     .cuid("Usuário não autorizado"),
+  userId: z
+    .string({ required_error: "Usuário não autorizado" })
+    .cuid("Usuário não autorizado"),
 });

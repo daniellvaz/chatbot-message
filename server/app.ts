@@ -9,7 +9,11 @@ import RequestError from "./src/handler/RequestError";
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "*",
+  })
+);
 app.use(express.json());
 
 app.use("/api", apiRouter);

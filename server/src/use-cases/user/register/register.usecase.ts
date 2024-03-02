@@ -20,7 +20,7 @@ export default class UserRegisterUseCase {
     });
     const role = await this.prisma.role.findUnique({
       where: {
-        value: "manager",
+        value: "MANAGER",
       },
     });
 

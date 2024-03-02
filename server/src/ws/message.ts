@@ -1,56 +1,87 @@
-import jwt from "jsonwebtoken";
 import { Server } from "socket.io";
 
 import server from "../../server";
-import { env } from "../env";
-import { prisma } from "../database";
-import { messageCreateUseCase } from "../use-cases/message/create";
-import { messageFindUseCase } from "../use-cases/message/find";
+
+import { User } from "../database/Entities/User";
 import { Message } from "../database/Entities/Message";
+
 import { roomCreateUseCase } from "../use-cases/room/create";
 import { roomMemberUseCase } from "../use-cases/room/members";
+import { userRegisterUseCase } from "../use-cases/user/register";
+import { messageCreateUseCase } from "../use-cases/message/create";
+
+import { prisma } from "../database";
 
 export const wsServer = new Server(server, {
   cors: {
-    origin: "*",
+    origin: ["*", "http://localhost:5173"],
   },
 });
 
+interface Join {
+  email: string;
+  roomId?: string;
+}
+
 wsServer.on("connection", async (socket) => {
-  const { token } = socket.handshake.auth;
+  console.log("Client connected");
 
-  if (!token) {
-    socket.emit("error", "Usuário não autorizado");
-    return;
-  }
+  socket.on("SIGN_IN", async (event) => {
+    const data: User = JSON.parse(event);
+    const result = await userRegisterUseCase.execute(data);
 
-  const userId = jwt.verify(token, env.API_SECRET_KEY).toString();
-  const user = await prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
+    server.emit("SUCCESS", JSON.stringify(result));
   });
 
-  if (!user) {
-    socket.emit("error", "Usuário não autorizado");
-    return;
-  }
-
-  const room = await roomCreateUseCase.execute({ name: user.name });
-
-  socket.join(room.name);
-
-  socket.on("message", async (event) => {
-    const { content } = JSON.parse(event);
-
-    await messageCreateUseCase.execute({
-      content,
-      roomId: room.id!,
+  socket.on("JOIN_ROOM", async (event) => {
+    const data: Join = JSON.parse(event);
+    const user = await prisma.user.findUnique({
+      where: {
+        email: data.email,
+      },
+      include: {
+        role: true,
+      },
     });
 
-    await roomMemberUseCase.execute({
-      roomId: room.id!,
-      userId: user.id,
-    });
+    if (!user) {
+      socket.emit("ERROR", "Usuário não encontrado");
+      return;
+    }
+
+    if (user.role.value === "!USER") {
+      if (!data.roomId) {
+        socket.emit("ERROR", "É necessário informar a o grupo!");
+        return;
+      }
+
+      const roomId = data.roomId;
+      const userRoom = await roomMemberUseCase.execute({
+        roomId,
+        userId: user.id,
+      });
+
+      socket.emit("SUCCESS", JSON.stringify(userRoom));
+    } else {
+      const room = await roomCreateUseCase.execute({ name: user.name });
+      const userRoom = await roomMemberUseCase.execute({
+        roomId: room.id!,
+        userId: user.id,
+      });
+
+      socket.emit("SUCCESS", JSON.stringify(userRoom));
+    }
+  });
+
+  socket.on("SEND_MESSAGE", async (event) => {
+    const data: Message = JSON.parse(event);
+
+    await messageCreateUseCase.execute(data);
+  });
+
+  socket.on("TYPPING", (event) => {
+    const { user } = JSON.parse(event);
+
+    socket.emit("TYPPING", `${user} está digitando...`);
   });
 });
