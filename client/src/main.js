@@ -1,15 +1,17 @@
 import "./style.css";
 
+import * as VueRouter from "vue-router";
+
 import { createApp } from "vue";
-import VueSocketIO from "vue-socket.io";
+import { routes } from "./routes";
 
 import App from "./App.vue";
 
-createApp(App)
-  .use(
-    new VueSocketIO({
-      debug: true,
-      connection: "http://localhost:3333",
-    })
-  )
-  .mount("#app");
+const history = VueRouter.createMemoryHistory();
+
+const router = VueRouter.createRouter({
+  routes,
+  history,
+});
+
+createApp(App).use(router).mount("#app");

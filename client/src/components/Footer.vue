@@ -1,5 +1,5 @@
 <script>
-  const socket = io();
+  import { socket } from '../lib/socket.js'
 
   export default {
     data() {
